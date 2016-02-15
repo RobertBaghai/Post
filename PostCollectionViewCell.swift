@@ -10,5 +10,4 @@ import UIKit
 
 class PostCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var imageCell: UIImageView!
-    
 }

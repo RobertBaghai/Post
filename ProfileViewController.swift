@@ -23,12 +23,29 @@ class ProfileViewController: UIViewController, UICollectionViewDelegate, UIColle
         super.viewDidLoad()
         self.collectionView.delegate   = self
         self.collectionView.dataSource = self
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "getUserData", name: "retrieveUserData", object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "observe", name: "getProfileInfo", object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "update", name: "post", object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "reloadCollectionViewData", name: "retrievedPost", object: nil)
+        dataAccess.getCurrentUser()
+        let currentUser = dataAccess.currentUser
+        if currentUser != nil {
+            getUserData()
+        }
     }
     
-    func update(){
-        self.collectionView.reloadData()
+    func getUserData(){
+        dataAccess.getCurrentUser()
+        let currentUser = dataAccess.currentUser
+
+        self.dataAccess.getCurrentUserProfileInfo(currentUser!.objectId!)
+        self.dataAccess.retrieveAllImagesForUserId(currentUser!.objectId!)
+
+    }
+    
+    func reloadCollectionViewData(){
+        dispatch_async(dispatch_get_main_queue()) { () -> Void in
+            self.collectionView.reloadData()
+        }
     }
     
     override func didReceiveMemoryWarning() {
@@ -41,23 +58,18 @@ class ProfileViewController: UIViewController, UICollectionViewDelegate, UIColle
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
+
         dataAccess.getCurrentUser()
         let currentUser = dataAccess.currentUser
         self.navigationItem.title = "\(currentUser!.username!)'s Profile"
         self.userPostLabel.text   = "\(currentUser!.username!)'s Posts"
-        dataAccess.getObjectIdToDisplayUserInfo(currentUser!.objectId!)
-        dataAccess.retrieveAllImages(currentUser!.objectId!)
     }
     
     func observe(){
-        let profile = dataAccess.userProfile
-        dispatch_async(dispatch_get_main_queue()) { () -> Void in
-            self.profileDescription.text = profile?.usersDescription
-            self.profileName.text        = profile?.userProfileName
-            self.profileAvatar.image     = profile?.usersAvatar
-            print(profile?.usersDescription)
-            self.view.reloadInputViews()
-        }
+        let profile: UserProfile = dataAccess.userProfile!
+        self.profileDescription.text = profile.usersDescription
+        self.profileName.text        = profile.userProfileName
+        self.profileAvatar.image     = profile.usersAvatar
     }
     
     //MARK: CollectionView DataSource
@@ -72,26 +84,26 @@ class ProfileViewController: UIViewController, UICollectionViewDelegate, UIColle
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reuseIdentifier, forIndexPath: indexPath) as! PostCollectionViewCell
         
-        let name: ImagePost = dataAccess.arrayOfUserPosts[indexPath.row]
-        cell.imageCell.image = name.postedImage!
+        let imagePosts: ImagePost = dataAccess.arrayOfUserPosts[indexPath.row]
+        cell.imageCell.image = imagePosts.postedImage!
         
         return cell
     }
     
     @IBAction func picturePickerButton(sender: AnyObject) {
-        let alertController = UIAlertController.init(title: "Choose a picture to Post!", message: "Would you like to select a photo or take a new one?", preferredStyle: .ActionSheet)
+        let alertController = UIAlertController.init(title: "Choose a picture to Post!", message: "Would you like to select an existing photo or take a new one?", preferredStyle: .ActionSheet)
         let cancelAction: UIAlertAction = UIAlertAction(title: "Cancel", style: .Cancel,
-            handler: {action -> Void in
+            handler: { action -> Void in
                 //Just dismiss action sheet
         })
-        let selectPhotoAction: UIAlertAction = UIAlertAction(title: "Select Photo", style: .Default, handler: {action -> Void in
+        let selectPhotoAction: UIAlertAction = UIAlertAction(title: "Choose Existing", style: .Default, handler: {action -> Void in
             let picker = UIImagePickerController()
             picker.delegate = self
             picker.allowsEditing = true
             picker.sourceType = UIImagePickerControllerSourceType.PhotoLibrary
             self.presentViewController(picker, animated: true, completion: nil)
         })
-        let takePhotoAction: UIAlertAction = UIAlertAction(title: "Take Photo", style: .Default, handler: {action -> Void in
+        let takePhotoAction: UIAlertAction = UIAlertAction(title: "Take Picture", style: .Default, handler: {action -> Void in
             let picker = UIImagePickerController()
             picker.delegate = self
             picker.allowsEditing = true
@@ -113,6 +125,8 @@ class ProfileViewController: UIViewController, UICollectionViewDelegate, UIColle
     }
     
     //MARK: CollectionView Delegate
+    //put collection view delegates here
+    
     //     MARK: - Navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if( segue.identifier == "showEditProfileScreen" ){
@@ -123,7 +137,6 @@ class ProfileViewController: UIViewController, UICollectionViewDelegate, UIColle
             }
         } else if( segue.identifier == "showPostDetailScreen"){
             if let postPicView: PostImageViewController = segue.destinationViewController as? PostImageViewController {
-                print("hey")
                 postPicView.imagePickerImage = sender as? UIImage
             }
         }

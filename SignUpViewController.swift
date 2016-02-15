@@ -32,7 +32,7 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
         
         let newUser     = self.usernameField.text?.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
         let newPassword = self.passwordField.text?.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-        let newEmail    = self.emailField.text?.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+        let newEmail    =    self.emailField.text?.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
         
         if( newUser?.characters.count == 0 || newPassword?.characters.count == 0 || newEmail?.characters.count == 0 ){
             let alertController = UIAlertController.init(title: "Oops!", message: "Make sure all fields are filled in!", preferredStyle: .ActionSheet)

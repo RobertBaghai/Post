@@ -8,21 +8,30 @@
 
 import Foundation
 import Parse
-
+import ParseUI
 
 class DataAccessObject {
     static let sharedInstance = DataAccessObject()
-    var currentUser = PFUser.currentUser()
-    var newError: NSError?
-    var userProfile: UserProfile?
-    var imagePost: ImagePost?
-    var profileName: String?
+    var currentUser           = PFUser.currentUser()
+    var newError:           NSError?
+    var userProfile:        UserProfile?
+    var imagePost:          ImagePost?
+    var profileName:        String?
     var profileDescription: String?
-    var profilePicture: UIImage?
-    var arrayOfUserPosts: [ImagePost] = []
+    var profilePicture:     UIImage?
+    var arrayOfUserPosts:   [ImagePost] = []
+    var collectionView:     PFQueryCollectionViewController?
+    var cell:               PFCollectionViewCell?
     
     private init() {
         PFUser.registerSubclass()
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "loginError",       object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "loginSuccess",     object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "signupError",      object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "signupSuccess",    object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "getProfileInfo",   object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "retrievedPost",    object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "retrieveUserData", object: nil)
     }
     
     //MARK: Login User with parse
@@ -31,11 +40,11 @@ class DataAccessObject {
             (user: PFUser?, error: NSError?) -> Void in
             if let error = error {
                 self.newError = error
-                NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "loginError", object: nil)
-                NSNotificationCenter.defaultCenter().postNotificationName("loginError", object: self)
+                NSNotificationCenter.defaultCenter().postNotificationName("loginError", object: nil)
             } else {
-                NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "loginSuccess", object: nil)
-                NSNotificationCenter.defaultCenter().postNotificationName("loginSuccess", object: self)
+                NSNotificationCenter.defaultCenter().postNotificationName("loginSuccess", object: nil)
+                //retrieve profile info + posts when user logs in successfully
+                NSNotificationCenter.defaultCenter().postNotificationName("retrieveUserData", object: nil)
             }
         }
     }
@@ -50,17 +59,15 @@ class DataAccessObject {
             (succeeded: Bool, error: NSError?) -> Void in
             if let error = error {
                 self.newError = error
-                NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "signupError", object: nil)
-                NSNotificationCenter.defaultCenter().postNotificationName("signupError", object: self)
+                NSNotificationCenter.defaultCenter().postNotificationName("signupError", object: nil)
             } else {
-                NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "signupSuccess", object: nil)
-                NSNotificationCenter.defaultCenter().postNotificationName("signupSuccess", object: self)
+                NSNotificationCenter.defaultCenter().postNotificationName("signupSuccess", object: nil)
                 self.insertDefaultUserProfileInfoUponSuccessfulSignup(newUser.objectId!, andUsername: newUser.username!)
             }
         }
     }
     
-    //MARK: Default User Info
+    //MARK: Input Default New-User Info
     func insertDefaultUserProfileInfoUponSuccessfulSignup (withUserObjectId: String, andUsername:String){
         let defaultAvatar           = UIImage(named: "AvatarPlaceholderBig")
         let imageData: NSData       = UIImagePNGRepresentation(defaultAvatar!)!
@@ -84,155 +91,181 @@ class DataAccessObject {
     }
     
     //MARK: Update User Profile Info
-    func updateExistingUserProfileInfo(name: String, details: String, avatar: UIImage, forUserProfileObjectId:String){
+    func updateCurrentUserProfileInfo(name: String, details: String, avatar: UIImage, currentuserObjectId:String){
         let imageData: NSData = UIImagePNGRepresentation(avatar)!
         let updateFile        = PFFile(name: "newImage.png", data: imageData)
-        
         let query = PFQuery(className: "UserProfile")
-        query.getObjectInBackgroundWithId("\(forUserProfileObjectId)"){
-            (updatedObject:PFObject?, error: NSError?) -> Void in
-            if (error != nil){
-                print(error?.userInfo)
-            } else {
-                updatedObject!["ProfileName"]    = name
-                updatedObject!["ProfileAboutMe"] = details
-                updatedObject!["ProfileAvatar"]  = updateFile
-                updatedObject?.saveInBackground()
-            }
-        }
-    }
-    
-    func getObjectIdFromUserProfileParseClassForUser(currentUserId: String,name: String, details: String, avatar: UIImage) {
-        let query = PFQuery(className: "UserProfile")
-        query.whereKey("UserObjectId", equalTo: currentUserId)
+        query.whereKey("UserObjectId", equalTo: currentuserObjectId)
         query.findObjectsInBackgroundWithBlock {
-            (objects:[PFObject]?,error: NSError?) -> Void in
-            for tempParseObj:PFObject in objects! {
+            (objects:[PFObject]?, error:NSError?) -> Void in
+            for updatedObject:PFObject in objects! {
                 if error != nil {
                     print(error?.userInfo)
                 } else {
-                    self.updateExistingUserProfileInfo(name, details: details, avatar: avatar, forUserProfileObjectId: tempParseObj.objectId!)
+                    updatedObject["ProfileName"]    = name
+                    updatedObject["ProfileAboutMe"] = details
+                    updatedObject["ProfileAvatar"]  = updateFile
+                    updatedObject.saveInBackgroundWithBlock{
+                        (success: Bool, error: NSError?) -> Void in
+                        
+                        if ( success ) {
+                            self.getCurrentUserProfileInfo(self.currentUser!.objectId!)
+                        } else {
+                            print(error?.userInfo, error?.localizedDescription)
+                        }
+                    }
                 }
             }
         }
     }
     
     //MARK: Get User Profile Info
-    func getExistingUserProfileInfo(forUserProfileObjectId:String){
+    func getCurrentUserProfileInfo(currentuserObjectId:String){
         let query = PFQuery(className: "UserProfile")
-        query.getObjectInBackgroundWithId("\(forUserProfileObjectId)"){
-            (updatedObject:PFObject?, error: NSError?) -> Void in
-            if (error != nil){
-                print(error?.userInfo)
-            } else {
-                self.profileName        = updatedObject!["ProfileName"] as? String
-                self.profileDescription = updatedObject!["ProfileAboutMe"] as? String
-                self.profilePicture     = updatedObject!["ProfileAvatar"] as? UIImage
-            }
-        }
-    }
-    
-    func getObjectIdToDisplayUserInfo(currentUserId: String) {
-        let query = PFQuery(className: "UserProfile")
-        query.whereKey("UserObjectId", equalTo: currentUserId)
+        query.whereKey("UserObjectId", equalTo: currentuserObjectId)
         query.findObjectsInBackgroundWithBlock {
-            (objects:[PFObject]?,error: NSError?) -> Void in
-            for tempParseObj:PFObject in objects! {
-                if error != nil {
+            (objects:[PFObject]?, error:NSError?) -> Void in
+            for updatedObject:PFObject in objects! {
+                if (error != nil){
                     print(error?.userInfo)
                 } else {
-                    let profileName: String       = tempParseObj["ProfileName"]    as! String
-                    let profileAbout: String      = tempParseObj["ProfileAboutMe"] as! String
-                    let tempprofileAvatar: PFFile = tempParseObj["ProfileAvatar"]  as! PFFile
-                    let profileAvatar:UIImage     =  try! UIImage(data: tempprofileAvatar.getData())!
-                    let userObjectId: String      = tempParseObj["UserObjectId"]   as! String
-                    let objectId: String          = tempParseObj.objectId!
+                    let profileName:  String       = updatedObject["ProfileName"]    as! String
+                    let profileAbout: String       = updatedObject["ProfileAboutMe"] as! String
+                    let userObjectId: String       = updatedObject["UserObjectId"]   as! String
+                    let objectId:     String       = updatedObject.objectId!
+                    let tempprofileAvatar: PFFile  = updatedObject["ProfileAvatar"]  as! PFFile
                     
-                    self.userProfile = UserProfile.init(
-                        profileName: profileName,
-                        description: profileAbout,
-                        avatar: profileAvatar,
-                        usrId: userObjectId,
-                        profileObjId: objectId
-                    )
-                    self.getExistingUserProfileInfo(tempParseObj.objectId!)
-                    NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "getProfileInfo", object: nil)
-                    NSNotificationCenter.defaultCenter().postNotificationName("getProfileInfo", object: self)
+                    tempprofileAvatar.getDataInBackgroundWithBlock {
+                        (imageData: NSData?, error: NSError?) -> Void in
+                        
+                        if error == nil {
+                            if let imageData = imageData {
+                                let retrievedImage = UIImage(data: imageData)
+                                
+                                self.userProfile = UserProfile.init(
+                                    profileName: profileName,
+                                    description: profileAbout,
+                                    avatar: retrievedImage!,
+                                    usrId: userObjectId,
+                                    profileObjId: objectId
+                                )
+                                NSNotificationCenter.defaultCenter().postNotificationName("getProfileInfo", object: self.userProfile)
+                            }
+                        }
+                    }
                 }
             }
         }
     }
     
-    //MARK: Save/ Retrieve New Image Post
-    func postImageForUserId(username: String, userId: String, image: UIImage, imgDescription: String) {
-        let newObject = PFObject(className: "ImagePost")
-        let imageData: NSData = UIImagePNGRepresentation(image)!
-        let newFile = PFFile(name: "imagePosted.png", data: imageData)
-        newObject["Username"] = username
-        newObject["UserId"] = userId
-        newObject["Image"] = newFile
+    //MARK: Save New Post
+    func postNewImageForUserId(username: String, userId: String, image: UIImage, imgDescription: String) {
+        let imageData: NSData         = UIImagePNGRepresentation(image)!
+        let newFile                   = PFFile(name: "imagePosted.png", data: imageData)
+        let newObject                 = PFObject(className: "ImagePost")
+        newObject["Username"]         = username
+        newObject["UserId"]           = userId
+        newObject["Image"]            = newFile
         newObject["ImageDescription"] = imgDescription
         newObject.saveInBackgroundWithBlock {
             (success: Bool, error: NSError?) -> Void in
-            if ( success) {
-                print(newObject.objectId)
+            if ( success ) {
                 print("Image Saved")
-                self.retrieveParseImagesForUser(userId, withImageId: newObject.objectId!)
-                
+                //retrieve image just taken for user, then call retrievedPost notif to reload collectionView..
+                //right now it retrieves all images all over again and reloads collectionView
+                self.retrieveAllImagesForUserId(self.currentUser!.objectId!)
+                //                                self.retrieveNewPostedImage(newObject.objectId!)
+                //                                print(self.currentUser!.objectId!, newObject.objectId!)
             } else {
                 print(error?.localizedDescription, error?.userInfo)
             }
         }
     }
     
-    func retrieveParseImagesForUser(userId:String, withImageId: String){
+    func retrieveNewPostedImage(imageId: String){
         let query = PFQuery(className: "ImagePost")
-        query.whereKey("UserId", equalTo: userId)
-        query.findObjectsInBackgroundWithBlock {
-            (object:[PFObject]?, error:NSError?) -> Void in
-            
-            for temp: PFObject in object! {
-                let username = temp["Username"] as? String
-                let userId   = temp["UserId"] as? String
-                let description = temp["ImageDescription"] as? String
-                
-                let file:PFFile     = temp["Image"] as! PFFile
-                let retrievedImage:UIImage = try! UIImage(data: file.getData())!
-                
-                self.imagePost = ImagePost.init(image: retrievedImage, userId: userId!, imageId: withImageId, description: description!, username: username!)
-                self.arrayOfUserPosts.append(self.imagePost!)
+        query.orderByDescending("createdAt")
+        query.whereKey("objectId", equalTo: imageId)
+        query.getObjectInBackgroundWithId(imageId) {
+            (object:PFObject?, error: NSError?) -> Void in
+            if error != nil {
+                let username:    String       = object!["Username"] as! String
+                let userId:      String       = object!["UserId"] as! String
+                let description: String       = object!["ImageDescription"] as! String
+                let imageId:     String       = object!.objectId!
+                let file:        PFFile       = object!["Image"] as! PFFile
+                file.getDataInBackgroundWithBlock {
+                    (imageData: NSData?, error: NSError?) -> Void in
+                    
+                    if error == nil {
+                        if let imageData       = imageData {
+                            let retrievedImage = UIImage(data: imageData)
+                            
+                            self.imagePost = ImagePost.init(
+                                image: retrievedImage!,
+                                userId: userId,
+                                imageId: imageId,
+                                description: description,
+                                username: username)
+                            self.arrayOfUserPosts.append(self.imagePost!)
+                            //reload colelction view
+                        }
+                    }
+                }
             }
-            print("\(self.arrayOfUserPosts)")
         }
     }
     
-    //MARK: test
-    func retrieveAllImages(userId:String){
+    //MARK: Retrieve Posts for UserId
+    func retrieveAllImagesForUserId(userId:String){
+        self.arrayOfUserPosts.removeAll()
         let query = PFQuery(className: "ImagePost")
         query.whereKey("UserId", equalTo: userId)
+        query.orderByDescending("createdAt")
         query.findObjectsInBackgroundWithBlock {
             (object:[PFObject]?, error:NSError?) -> Void in
             
-            for temp: PFObject in object! {
-                let username = temp["Username"] as? String
-                let userId   = temp["UserId"] as? String
-                let description = temp["ImageDescription"] as? String
+            if ( error != nil ){
+                print(error?.localizedDescription, error?.userInfo)
+            } else {
                 
-                let file:PFFile     = temp["Image"] as! PFFile
-                let retrievedImage:UIImage = try! UIImage(data: file.getData())!
-                let imageId: String = temp.objectId!
-                
-                self.imagePost = ImagePost.init(image: retrievedImage, userId: userId!, imageId: imageId, description: description!, username: username!)
-                self.arrayOfUserPosts.append(self.imagePost!)
+                for temp: PFObject in object! {
+                    let username:    String       = temp["Username"] as! String
+                    let userId:      String       = temp["UserId"] as! String
+                    let description: String       = temp["ImageDescription"] as! String
+                    let imageId:     String       = temp.objectId!
+                    let file:        PFFile       = temp["Image"] as! PFFile
+                    
+                    print(file.url)
+                    file.getDataInBackgroundWithBlock {
+                        (imageData: NSData?, error: NSError?) -> Void in
+                        
+                        if error == nil {
+                            if let imageData       = imageData {
+                                let retrievedImage = UIImage(data: imageData)
+                                
+                                self.imagePost = ImagePost.init(
+                                    image: retrievedImage!,
+                                    userId: userId,
+                                    imageId: imageId,
+                                    description: description,
+                                    username: username)
+                                self.arrayOfUserPosts.append(self.imagePost!)
+                                print(self.imagePost!.imageId!)
+                            }
+                        }
+                    }
+                }
+                NSNotificationCenter.defaultCenter().postNotificationName("retrievedPost", object: nil)
             }
-            print("\(self.arrayOfUserPosts)")
-            NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "post", object: nil)
-            NSNotificationCenter.defaultCenter().postNotificationName("post", object: self)
         }
     }
+
     
     //MARK: Log out Current User
     func logoutUser(){
+        // Clear all caches
+        PFQuery.clearAllCachedResults()
         PFUser.logOut()
     }
     
@@ -245,11 +278,9 @@ class DataAccessObject {
     @objc func updateNotificaitonSent(notification: NSNotification) {
         print("\(notification.name) notificaiton sent")
     }
-    
     deinit {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
-    
     
     
 }

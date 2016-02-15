@@ -11,10 +11,10 @@ import UIKit
 
 class ImagePost {
     var postedImage: UIImage?
-    var userId:String?
-    var imageId: String?
+    var userId:      String?
+    var imageId:     String?
     var description: String?
-    var username: String?
+    var username:    String?
     
     init(image:UIImage, userId:String, imageId:String, description: String, username: String ) {
         self.postedImage = image
@@ -23,8 +23,5 @@ class ImagePost {
         self.description = description
         self.username    = username
     }
-    
-    
-    
     
 }

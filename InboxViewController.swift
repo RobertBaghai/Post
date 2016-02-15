@@ -21,7 +21,7 @@ class InboxViewController: UIViewController {
             performSegueWithIdentifier("showLoginScreen", sender: self)
         }
     }
-    
+
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
@@ -29,7 +29,7 @@ class InboxViewController: UIViewController {
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBarHidden = false
-    }
+    } 
     
     @IBAction func logout(sender: AnyObject) {
         dataAccess.logoutUser()

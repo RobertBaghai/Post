@@ -8,47 +8,48 @@
 
 import UIKit
 
-class PostImageViewController: UIViewController {
+class PostImageViewController: UIViewController, UITextFieldDelegate {
+    
     var imagePickerImage: UIImage?
     @IBOutlet weak var imageForPosting: UIImageView!
     let dataAccess = DataAccessObject.sharedInstance
     var currentUser: AnyObject?
-    
     @IBOutlet weak var newImgDescription: UITextField!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.imageForPosting.image = imagePickerImage
+        self.newImgDescription.delegate = self
+        dataAccess.getCurrentUser()
+        self.currentUser = dataAccess.currentUser
     }
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-        dataAccess.getCurrentUser()
-        self.currentUser = dataAccess.currentUser
-        
     }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        
     }
     
     @IBAction func cancelButton(sender: AnyObject) {
-        
         self.navigationController?.popViewControllerAnimated(true)
     }
     
     @IBAction func postImageButton(sender: AnyObject) {
-        
-        dataAccess.postImageForUserId(dataAccess.currentUser!.username!, userId: currentUser!.objectId!!, image: self.imageForPosting!.image!, imgDescription: self.newImgDescription!.text!)
+        dataAccess.postNewImageForUserId(
+            dataAccess.currentUser!.username!,
+            userId: currentUser!.objectId!!,
+            image: self.imageForPosting!.image!,
+            imgDescription: self.newImgDescription!.text!
+        )
+        self.navigationController?.popViewControllerAnimated(true)
     }
-    /*
-    // MARK: - Navigation
     
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-    // Get the new view controller using segue.destinationViewController.
-    // Pass the selected object to the new view controller.
+    //MARK: UITextFieldDelegate
+    func textFieldShouldReturn(userText: UITextField) -> Bool {
+        userText.resignFirstResponder()
+        return true;
     }
-    */
     
 }

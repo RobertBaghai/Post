@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9531" systemVersion="15D21" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="vKf-jd-iFI">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9532" systemVersion="15D21" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="vKf-jd-iFI">
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9529"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9530"/>
     </dependencies>
     <scenes>
         <!--Log In View Controller-->
@@ -379,7 +379,7 @@
                             </imageView>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vJc-1w-Rus">
                                 <rect key="frame" x="211" y="254" width="183" height="30"/>
-                                <fontDescription key="fontDescription" name="HelveticaNeue-Bold" family="Helvetica Neue" pointSize="18"/>
+                                <fontDescription key="fontDescription" name="Copperplate" family="Copperplate" pointSize="18"/>
                                 <state key="normal" title="Edit My Profile">
                                     <color key="titleColor" red="1" green="0.50196078430000002" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                     <color key="titleShadowColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
@@ -559,7 +559,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="eF3-Ob-TD0" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1590" y="3119"/>
+            <point key="canvasLocation" x="-1592" y="3119"/>
         </scene>
         <!--My Profile-->
         <scene sceneID="tTe-yK-5PN">
@@ -585,9 +585,9 @@
         <image name="AvatarPlaceholderBig" width="60" height="60"/>
         <image name="IconFollowers" width="52" height="37"/>
         <image name="SeparatorTimelineDark" width="328" height="1"/>
-        <image name="camera" width="32" height="21"/>
-        <image name="first" width="32" height="21"/>
-        <image name="friends" width="32" height="21"/>
+        <image name="camera" width="33" height="24"/>
+        <image name="first" width="30" height="30"/>
+        <image name="friends" width="40" height="24"/>
         <image name="inbox" width="32" height="21"/>
     </resources>
 </document>

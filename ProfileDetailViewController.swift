@@ -32,6 +32,11 @@ class ProfileDetailViewController: UIViewController, UITextFieldDelegate,UIImage
         super.viewDidAppear(animated)
     }
     
+//    override func viewDidDisappear(animated: Bool) {
+//        super.viewDidDisappear(animated)
+////        dataAccess.getCurrentUserProfileInfo(dataAccess.currentUser!.objectId!)
+//    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
@@ -43,51 +48,30 @@ class ProfileDetailViewController: UIViewController, UITextFieldDelegate,UIImage
             handler: {action -> Void in
                 //Just dismiss action sheet
         })
-        let selectPhotoAction: UIAlertAction = UIAlertAction(title: "Select Photo", style: .Default, handler: {action -> Void in
-            
+        let selectPhotoAction: UIAlertAction = UIAlertAction(title: "Choose Existing", style: .Default, handler: {action -> Void in
             let picker = UIImagePickerController()
-            picker.delegate = self
+            picker.delegate      = self
             picker.allowsEditing = true
-            picker.sourceType = UIImagePickerControllerSourceType.PhotoLibrary
+            picker.sourceType    = UIImagePickerControllerSourceType.PhotoLibrary
             self.presentViewController(picker, animated: true, completion: nil)
         })
-        let takePhotoAction: UIAlertAction = UIAlertAction(title: "Take Photo", style: .Default, handler: {action -> Void in
+        let takePhotoAction: UIAlertAction = UIAlertAction(title: "Take Picture", style: .Default, handler: {action -> Void in
             
             let picker = UIImagePickerController()
-            picker.delegate = self
+            picker.delegate      = self
             picker.allowsEditing = true
-            picker.sourceType = UIImagePickerControllerSourceType.Camera
+            picker.sourceType    = UIImagePickerControllerSourceType.Camera
             self.presentViewController(picker, animated: true, completion: nil)
-            
-            
-            //            if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
-            //                UIAlertView *myAlertView = [[UIAlertView alloc] initWithTitle:@"Error"
-            //                message:@"Device has no camera"
-            //                delegate:nil
-            //                cancelButtonTitle:@"Okay"
-            //                otherButtonTitles: nil];
-            //                [myAlertView show];
-            //            }
-            //            else if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]){
-            //                UIImagePickerController *picker = [[UIImagePickerController alloc] init];
-            //                picker.delegate = self;
-            //                picker.allowsEditing = YES;
-            //                picker.sourceType = UIImagePickerControllerSourceTypeCamera;
-            //                [self presentViewController:picker animated:YES completion:NULL];
-            //            }
         })
         
         alertController.addAction(cancelAction)
         alertController.addAction(selectPhotoAction)
         alertController.addAction(takePhotoAction)
         self.presentViewController(alertController, animated: true, completion: nil)
-        
     }
     
     func imagePickerController(picker: UIImagePickerController, didFinishPickingImage image: UIImage, editingInfo: [String : AnyObject]?) {
-        
         self.newProfileAvatarImage.image = image
-        
         self.dismissViewControllerAnimated(true, completion: nil)
     }
     
@@ -97,9 +81,14 @@ class ProfileDetailViewController: UIViewController, UITextFieldDelegate,UIImage
     
     @IBAction func submitNewProfileInfoButton(sender: AnyObject) {
         let newimage = self.newProfileAvatarImage.image
-        print("\(dataAccess.currentUser!.objectId!)")
-        dataAccess.getObjectIdFromUserProfileParseClassForUser("\(dataAccess.currentUser!.objectId!)", name: self.newProfileNameText.text!, details: self.newProfileDescriptionText.text!, avatar: newimage!)
         
+        dataAccess.updateCurrentUserProfileInfo(
+            self.newProfileNameText.text!,
+            details: self.newProfileDescriptionText.text!,
+            avatar: newimage!,
+            currentuserObjectId: "\(dataAccess.currentUser!.objectId!)"
+        )
+
         self.navigationController?.popViewControllerAnimated(true)
     }
     
