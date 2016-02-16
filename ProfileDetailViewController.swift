@@ -88,7 +88,6 @@ class ProfileDetailViewController: UIViewController, UITextFieldDelegate,UIImage
             avatar: newimage!,
             currentuserObjectId: "\(dataAccess.currentUser!.objectId!)"
         )
-
         self.navigationController?.popViewControllerAnimated(true)
     }
     

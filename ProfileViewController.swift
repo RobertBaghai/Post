@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import Parse
+import SDWebImage
 
 class ProfileViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     @IBOutlet weak var userPostLabel: UILabel!
@@ -59,14 +59,12 @@ class ProfileViewController: UIViewController, UICollectionViewDelegate, UIColle
         let profile: UserProfile = dataAccess.userProfile!
         self.profileDescription.text = profile.usersDescription
         self.profileName.text        = profile.userProfileName
-        profile.usersAvatar!.getDataInBackgroundWithBlock({ (data:NSData?, error:NSError?) -> Void in
-            if error == nil {
-                if let imageData       = data {
-                    let retrievedImage = UIImage(data: imageData)
-                    self.profileAvatar.image     = retrievedImage
-                }
-            }
-        })
+        
+        let imageUrl:NSURL? = NSURL(string: "\(profile.usersAvatar!.url!)")
+        let placeholderImage: UIImage = UIImage(named: "AvatarPlaceholderBig")!
+        if let url = imageUrl {
+            self.profileAvatar.sd_setImageWithURL(url, placeholderImage: placeholderImage)
+        }
     }
     
     @IBAction func editProfileButton(sender: AnyObject) {
@@ -87,14 +85,11 @@ class ProfileViewController: UIViewController, UICollectionViewDelegate, UIColle
         
         let imagePosts: ImagePost = dataAccess.arrayOfUserPosts[indexPath.row]
         
-        imagePosts.postedImage?.getDataInBackgroundWithBlock({ (data:NSData?, error:NSError?) -> Void in
-            if error == nil {
-                if let imageData       = data {
-                    let retrievedImage = UIImage(data: imageData)
-                    cell.imageCell.image = retrievedImage
-                }
-            }
-        })
+        let imageUrl:NSURL? = NSURL(string: "\(imagePosts.postedImage!.url!)")
+        let placeholderImage: UIImage = UIImage(named: "placeholder.png")!
+        if let url = imageUrl {
+            cell.imageCell.sd_setImageWithURL(url, placeholderImage: placeholderImage)
+        }
         
         return cell
     }

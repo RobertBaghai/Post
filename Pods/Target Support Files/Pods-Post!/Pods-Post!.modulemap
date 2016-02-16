@@ -1,0 +1,6 @@
+framework module Pods_Post_ {
+  umbrella header "Pods-Post!-umbrella.h"
+
+  export *
+  module * { export * }
+}

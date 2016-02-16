@@ -234,7 +234,7 @@ class DataAccessObject {
     
     //MARK: Log out Current User
     func logoutUser(){
-            // Clear all caches, then log out user
+        // Clear all caches, then log out user
         PFQuery.clearAllCachedResults()
         PFUser.logOut()
     }

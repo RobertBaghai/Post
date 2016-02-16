@@ -18,7 +18,7 @@ class PostImageViewController: UIViewController, UITextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.imageForPosting.image = imagePickerImage
+        self.imageForPosting.image      = imagePickerImage
         self.newImgDescription.delegate = self
         dataAccess.getCurrentUser()
         self.currentUser = dataAccess.currentUser
