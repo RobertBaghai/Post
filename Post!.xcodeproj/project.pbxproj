@@ -276,8 +276,8 @@
 		4386A3D91C6E2E0900DE466F /* Detail */ = {
 			isa = PBXGroup;
 			children = (
-				4386A3F01C6E2FD400DE466F /* PostDetailViewController.swift */,
 				4386A3F21C6E2FDE00DE466F /* ProfileDetailViewController.swift */,
+				4386A3F01C6E2FD400DE466F /* PostDetailViewController.swift */,
 			);
 			name = Detail;
 			sourceTree = "<group>";
@@ -387,6 +387,7 @@
 				TargetAttributes = {
 					437F2C4B1C6DA3C900D1452C = {
 						CreatedOnToolsVersion = 7.2;
+						DevelopmentTeam = PU9PMM99H2;
 					};
 					437F2C5F1C6DA3C900D1452C = {
 						CreatedOnToolsVersion = 7.2;
@@ -606,6 +607,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/parse-library-1.12.0",
@@ -621,6 +623,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/parse-library-1.12.0",

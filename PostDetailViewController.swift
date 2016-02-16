@@ -9,10 +9,23 @@
 import UIKit
 
 class PostDetailViewController: UIViewController {
-
+    var imagePost:          ImagePost?
+    @IBOutlet weak var selectedPostedImage: UIImageView!
+    @IBOutlet weak var selectedPostedImageDescription: UILabel!
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        self.imagePost!.postedImage!.getDataInBackgroundWithBlock({
+            (data:NSData?, error:NSError?) -> Void in
+            if error == nil {
+                if let imageData       = data {
+                    let retrievedImage = UIImage(data: imageData)
+                    self.selectedPostedImage.image = retrievedImage
+                }
+            }
+        })
+        self.selectedPostedImageDescription.text = self.imagePost?.description
+        
+        
     }
 
     override func didReceiveMemoryWarning() {

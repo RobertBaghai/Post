@@ -8,7 +8,6 @@
 
 import Foundation
 import Parse
-import ParseUI
 
 class DataAccessObject {
     static let sharedInstance = DataAccessObject()
@@ -20,8 +19,6 @@ class DataAccessObject {
     var profileDescription: String?
     var profilePicture:     UIImage?
     var arrayOfUserPosts:   [ImagePost] = []
-    var collectionView:     PFQueryCollectionViewController?
-    var cell:               PFCollectionViewCell?
     
     private init() {
         PFUser.registerSubclass()
@@ -63,6 +60,11 @@ class DataAccessObject {
             } else {
                 NSNotificationCenter.defaultCenter().postNotificationName("signupSuccess", object: nil)
                 self.insertDefaultUserProfileInfoUponSuccessfulSignup(newUser.objectId!, andUsername: newUser.username!)
+                
+                //slight issue when user is logged in, logs out and then signs up with new acc.. old profile info
+                //still shows if the application is not restarted
+                NSNotificationCenter.defaultCenter().postNotificationName("retrieveUserData", object: nil)
+                //
             }
         }
     }
@@ -133,26 +135,16 @@ class DataAccessObject {
                     let profileAbout: String       = updatedObject["ProfileAboutMe"] as! String
                     let userObjectId: String       = updatedObject["UserObjectId"]   as! String
                     let objectId:     String       = updatedObject.objectId!
-                    let tempprofileAvatar: PFFile  = updatedObject["ProfileAvatar"]  as! PFFile
+                    let profileAvatar: PFFile      = updatedObject["ProfileAvatar"]  as! PFFile
                     
-                    tempprofileAvatar.getDataInBackgroundWithBlock {
-                        (imageData: NSData?, error: NSError?) -> Void in
-                        
-                        if error == nil {
-                            if let imageData = imageData {
-                                let retrievedImage = UIImage(data: imageData)
-                                
-                                self.userProfile = UserProfile.init(
-                                    profileName: profileName,
-                                    description: profileAbout,
-                                    avatar: retrievedImage!,
-                                    usrId: userObjectId,
-                                    profileObjId: objectId
-                                )
-                                NSNotificationCenter.defaultCenter().postNotificationName("getProfileInfo", object: self.userProfile)
-                            }
-                        }
-                    }
+                    self.userProfile = UserProfile.init(
+                        profileName: profileName,
+                        description: profileAbout,
+                        avatar: profileAvatar,
+                        usrId: userObjectId,
+                        profileObjId: objectId
+                    )
+                    NSNotificationCenter.defaultCenter().postNotificationName("getProfileInfo", object: self.userProfile)
                 }
             }
         }
@@ -174,8 +166,7 @@ class DataAccessObject {
                 //retrieve image just taken for user, then call retrievedPost notif to reload collectionView..
                 //right now it retrieves all images all over again and reloads collectionView
                 self.retrieveAllImagesForUserId(self.currentUser!.objectId!)
-                //                                self.retrieveNewPostedImage(newObject.objectId!)
-                //                                print(self.currentUser!.objectId!, newObject.objectId!)
+                //               self.retrieveNewPostedImage(newObject.objectId!)
             } else {
                 print(error?.localizedDescription, error?.userInfo)
             }
@@ -189,29 +180,20 @@ class DataAccessObject {
         query.getObjectInBackgroundWithId(imageId) {
             (object:PFObject?, error: NSError?) -> Void in
             if error != nil {
-                let username:    String       = object!["Username"] as! String
-                let userId:      String       = object!["UserId"] as! String
+                let username:    String       = object!["Username"]         as! String
+                let userId:      String       = object!["UserId"]           as! String
                 let description: String       = object!["ImageDescription"] as! String
                 let imageId:     String       = object!.objectId!
-                let file:        PFFile       = object!["Image"] as! PFFile
-                file.getDataInBackgroundWithBlock {
-                    (imageData: NSData?, error: NSError?) -> Void in
-                    
-                    if error == nil {
-                        if let imageData       = imageData {
-                            let retrievedImage = UIImage(data: imageData)
-                            
-                            self.imagePost = ImagePost.init(
-                                image: retrievedImage!,
-                                userId: userId,
-                                imageId: imageId,
-                                description: description,
-                                username: username)
-                            self.arrayOfUserPosts.append(self.imagePost!)
-                            //reload colelction view
-                        }
-                    }
-                }
+                let file:        PFFile       = object!["Image"]            as! PFFile
+                
+                self.imagePost = ImagePost.init(
+                    image: file,
+                    userId: userId,
+                    imageId: imageId,
+                    description: description,
+                    username: username)
+                self.arrayOfUserPosts.append(self.imagePost!)
+                //reload collection view
             }
         }
     }
@@ -230,41 +212,29 @@ class DataAccessObject {
             } else {
                 
                 for temp: PFObject in object! {
-                    let username:    String       = temp["Username"] as! String
-                    let userId:      String       = temp["UserId"] as! String
+                    let username:    String       = temp["Username"]         as! String
+                    let userId:      String       = temp["UserId"]           as! String
                     let description: String       = temp["ImageDescription"] as! String
                     let imageId:     String       = temp.objectId!
-                    let file:        PFFile       = temp["Image"] as! PFFile
+                    let file:        PFFile       = temp["Image"]            as! PFFile
                     
-                    print(file.url)
-                    file.getDataInBackgroundWithBlock {
-                        (imageData: NSData?, error: NSError?) -> Void in
-                        
-                        if error == nil {
-                            if let imageData       = imageData {
-                                let retrievedImage = UIImage(data: imageData)
-                                
-                                self.imagePost = ImagePost.init(
-                                    image: retrievedImage!,
-                                    userId: userId,
-                                    imageId: imageId,
-                                    description: description,
-                                    username: username)
-                                self.arrayOfUserPosts.append(self.imagePost!)
-                                print(self.imagePost!.imageId!)
-                            }
-                        }
-                    }
+                    self.imagePost = ImagePost.init(
+                        image: file,
+                        userId: userId,
+                        imageId: imageId,
+                        description: description,
+                        username: username
+                    )
+                    self.arrayOfUserPosts.append(self.imagePost!)
                 }
                 NSNotificationCenter.defaultCenter().postNotificationName("retrievedPost", object: nil)
             }
         }
     }
-
     
     //MARK: Log out Current User
     func logoutUser(){
-        // Clear all caches
+            // Clear all caches, then log out user
         PFQuery.clearAllCachedResults()
         PFUser.logOut()
     }

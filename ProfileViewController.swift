@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Parse
 
 class ProfileViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     @IBOutlet weak var userPostLabel: UILabel!
@@ -24,7 +25,7 @@ class ProfileViewController: UIViewController, UICollectionViewDelegate, UIColle
         self.collectionView.delegate   = self
         self.collectionView.dataSource = self
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "getUserData", name: "retrieveUserData", object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "observe", name: "getProfileInfo", object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "getProfileInfo", name: "getProfileInfo", object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "reloadCollectionViewData", name: "retrievedPost", object: nil)
         dataAccess.getCurrentUser()
         let currentUser = dataAccess.currentUser
@@ -33,13 +34,19 @@ class ProfileViewController: UIViewController, UICollectionViewDelegate, UIColle
         }
     }
     
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        dataAccess.getCurrentUser()
+        let currentUser = dataAccess.currentUser
+        self.navigationItem.title = "\(currentUser!.username!)'s Profile"
+        self.userPostLabel.text   = "\(currentUser!.username!)'s Posts"
+    }
+    
     func getUserData(){
         dataAccess.getCurrentUser()
         let currentUser = dataAccess.currentUser
-
         self.dataAccess.getCurrentUserProfileInfo(currentUser!.objectId!)
         self.dataAccess.retrieveAllImagesForUserId(currentUser!.objectId!)
-
     }
     
     func reloadCollectionViewData(){
@@ -48,28 +55,22 @@ class ProfileViewController: UIViewController, UICollectionViewDelegate, UIColle
         }
     }
     
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
+    func getProfileInfo(){
+        let profile: UserProfile = dataAccess.userProfile!
+        self.profileDescription.text = profile.usersDescription
+        self.profileName.text        = profile.userProfileName
+        profile.usersAvatar!.getDataInBackgroundWithBlock({ (data:NSData?, error:NSError?) -> Void in
+            if error == nil {
+                if let imageData       = data {
+                    let retrievedImage = UIImage(data: imageData)
+                    self.profileAvatar.image     = retrievedImage
+                }
+            }
+        })
     }
     
     @IBAction func editProfileButton(sender: AnyObject) {
         self.performSegueWithIdentifier("showEditProfileScreen", sender: self)
-    }
-    
-    override func viewWillAppear(animated: Bool) {
-        super.viewWillAppear(animated)
-
-        dataAccess.getCurrentUser()
-        let currentUser = dataAccess.currentUser
-        self.navigationItem.title = "\(currentUser!.username!)'s Profile"
-        self.userPostLabel.text   = "\(currentUser!.username!)'s Posts"
-    }
-    
-    func observe(){
-        let profile: UserProfile = dataAccess.userProfile!
-        self.profileDescription.text = profile.usersDescription
-        self.profileName.text        = profile.userProfileName
-        self.profileAvatar.image     = profile.usersAvatar
     }
     
     //MARK: CollectionView DataSource
@@ -85,7 +86,15 @@ class ProfileViewController: UIViewController, UICollectionViewDelegate, UIColle
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reuseIdentifier, forIndexPath: indexPath) as! PostCollectionViewCell
         
         let imagePosts: ImagePost = dataAccess.arrayOfUserPosts[indexPath.row]
-        cell.imageCell.image = imagePosts.postedImage!
+        
+        imagePosts.postedImage?.getDataInBackgroundWithBlock({ (data:NSData?, error:NSError?) -> Void in
+            if error == nil {
+                if let imageData       = data {
+                    let retrievedImage = UIImage(data: imageData)
+                    cell.imageCell.image = retrievedImage
+                }
+            }
+        })
         
         return cell
     }
@@ -121,11 +130,16 @@ class ProfileViewController: UIViewController, UICollectionViewDelegate, UIColle
         self.choosenImageForPosting = image
         
         self.dismissViewControllerAnimated(true, completion: nil)
-        self.performSegueWithIdentifier("showPostDetailScreen", sender: image)
+        self.performSegueWithIdentifier("showPostImageScreen", sender: image)
     }
     
     //MARK: CollectionView Delegate
-    //put collection view delegates here
+    
+    func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+        let imagePosts: ImagePost = dataAccess.arrayOfUserPosts[indexPath.row]
+        print(imagePosts.imageId!)
+        self.performSegueWithIdentifier("showPostDetailScreen", sender: imagePosts)
+    }
     
     //     MARK: - Navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
@@ -135,13 +149,18 @@ class ProfileViewController: UIViewController, UICollectionViewDelegate, UIColle
                 editProfileView.descText    =  self.profileDescription!.text!
                 editProfileView.avatarImage =  self.profileAvatar!.image
             }
-        } else if( segue.identifier == "showPostDetailScreen"){
+        } else if( segue.identifier == "showPostImageScreen"){
             if let postPicView: PostImageViewController = segue.destinationViewController as? PostImageViewController {
                 postPicView.imagePickerImage = sender as? UIImage
+            }
+        } else if( segue.identifier == "showPostDetailScreen"){
+            if let postDetailView: PostDetailViewController = segue.destinationViewController as? PostDetailViewController {
+                postDetailView.imagePost = sender as? ImagePost
             }
         }
     }
     
+    //MARK: Notification Center
     deinit {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }

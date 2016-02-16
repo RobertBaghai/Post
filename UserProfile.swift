@@ -8,15 +8,16 @@
 
 import Foundation
 import UIKit
+import Parse
 
 class UserProfile {
     var userProfileName:     String?
     var usersDescription:    String?
-    var usersAvatar:         UIImage?
+    var usersAvatar:         PFFile?
     var userId:              String?
     var userProfileObjectId: String?
     
-    init(profileName: String, description: String, avatar: UIImage, usrId: String, profileObjId: String){
+    init(profileName: String, description: String, avatar: PFFile, usrId: String, profileObjId: String){
         self.userProfileName     = profileName
         self.usersDescription    = description
         self.usersAvatar         = avatar
