@@ -8,6 +8,7 @@
 
 import Foundation
 import Parse
+import SDWebImage
 
 class DataAccessObject {
     static let sharedInstance = DataAccessObject()
@@ -15,10 +16,14 @@ class DataAccessObject {
     var newError:           NSError?
     var userProfile:        UserProfile?
     var imagePost:          ImagePost?
+    var imagePostDetail:    ImagePostDetail?
     var profileName:        String?
     var profileDescription: String?
     var profilePicture:     UIImage?
+    var retrievedAvatar:    PFFile?
     var arrayOfUserPosts:   [ImagePost] = []
+    var arrayOfComments:    [ImagePostDetail] = []
+    var arrayOfLikes:NSMutableArray   = []
     
     private init() {
         PFUser.registerSubclass()
@@ -29,6 +34,8 @@ class DataAccessObject {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "getProfileInfo",   object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "retrievedPost",    object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "retrieveUserData", object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "retrieveComments", object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "retrieveLikes", object: nil)
     }
     
     //MARK: Login User with parse
@@ -60,7 +67,6 @@ class DataAccessObject {
             } else {
                 NSNotificationCenter.defaultCenter().postNotificationName("signupSuccess", object: nil)
                 self.insertDefaultUserProfileInfoUponSuccessfulSignup(newUser.objectId!, andUsername: newUser.username!)
-                
                 //slight issue when user is logged in, logs out and then signs up with new acc.. old profile info
                 //still shows if the application is not restarted
                 NSNotificationCenter.defaultCenter().postNotificationName("retrieveUserData", object: nil)
@@ -173,6 +179,7 @@ class DataAccessObject {
         }
     }
     
+    //not using this method yet
     func retrieveNewPostedImage(imageId: String){
         let query = PFQuery(className: "ImagePost")
         query.orderByDescending("createdAt")
@@ -232,6 +239,151 @@ class DataAccessObject {
         }
     }
     
+    //MARK: Add Comments
+    func postCommentToImageId(id imageId: String, userId: String, username: String, comment: String){
+        
+        let newCommentObject = PFObject(className: "ImagePostDetails")
+        newCommentObject["imageId"]    = imageId
+        newCommentObject["userId"]     = userId
+        newCommentObject["username"]   = username
+        newCommentObject["comment"]    = comment
+        newCommentObject.saveInBackgroundWithBlock {
+            (success:Bool?, error: NSError?) -> Void in
+            if ( error != nil ) {
+                print(error?.localizedDescription, error?.userInfo)
+            } else {
+                print("Comment Saved")
+                //TODO: retrieve new comment and reload the table view
+                self.retrieveCommentsForImageId(id: imageId)
+            }
+        }
+    }
+    
+    //MARK: Get Comments
+    func retrieveCommentsForImageId(id imageId: String){
+        self.arrayOfComments.removeAll()
+        let query = PFQuery(className: "ImagePostDetails")
+        query.whereKey("imageId", equalTo: imageId)
+        query.orderByDescending("createdAt")
+        query.findObjectsInBackgroundWithBlock {
+            (objects:[PFObject]?, error:NSError?) -> Void in
+            
+            for commentObject in objects! {
+                if error != nil {
+                    print(error?.localizedDescription, error?.userInfo)
+                } else {
+                    let commentId = commentObject.objectId!
+                    let imageId   = commentObject["imageId"]    as! String
+                    let username  = commentObject["username"]   as! String
+                    let userId    = commentObject["userId"]     as! String
+                    let comment   = commentObject["comment"]    as! String
+                    
+                    self.imagePostDetail = ImagePostDetail.init(
+                        id: commentId,
+                        imageId: imageId,
+                        username: username,
+                        userId: userId,
+                        comment: comment
+                    )
+                    self.arrayOfComments.append(self.imagePostDetail!)
+                }
+            }
+            NSNotificationCenter.defaultCenter().postNotificationName("retrieveComments", object: nil)
+        }
+    }
+    
+    
+    func getUserAvatarForTableViewComment(userId: String, cell: UITableViewCell){
+        let placeholderImage                 = UIImage(named: "AvatarPlaceholderBig")
+        let query = PFQuery(className: "UserProfile")
+        query.whereKey("UserObjectId", equalTo: userId)
+        query.orderByDescending("createdAt")
+        query.findObjectsInBackgroundWithBlock {
+            (objects:[PFObject]?, error:NSError?) -> Void in
+            
+            for commentObject in objects! {
+                if error != nil {
+                    print(error?.localizedDescription, error?.userInfo)
+                } else {
+                    self.retrievedAvatar = commentObject["ProfileAvatar"] as? PFFile
+                    
+                    let imageUrl:NSURL? = NSURL(string: "\(self.retrievedAvatar!.url!)")
+                    if let url = imageUrl {
+                        cell.imageView?.sd_setImageWithURL(url, placeholderImage: placeholderImage)
+                    }
+                }
+            }
+            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                cell.setNeedsLayout() //invalidate current layout
+                cell.layoutIfNeeded() //update immediately
+            })
+        }
+    }
+    
+    func getLikersArray(button:UIButton, imageId:String, username: String){
+        self.arrayOfLikes.removeAllObjects()
+        let query = PFQuery(className: "ImageLike")
+        query.whereKey("ImageId", equalTo: imageId)
+        query.findObjectsInBackgroundWithBlock {
+            (objects:[PFObject]?, error: NSError?) -> Void in
+            
+            for likes in objects! {
+                let user = likes["User"] as! String
+                self.arrayOfLikes.addObject(user)
+            }
+            if self.arrayOfLikes.containsObject(username) {
+                button.setImage(UIImage(named:"ButtonLikeSelected"), forState: UIControlState.Normal)
+            } else {
+                button.setImage(UIImage(named:"ButtonLike"), forState: UIControlState.Normal)
+            }
+            NSNotificationCenter.defaultCenter().postNotificationName("retrieveLikes", object: nil)
+            button.enabled = true
+        }
+    }
+    
+    
+    func likeOrUnlikeAPost(button: UIButton, username:String, imageId:String){
+        button.enabled = false
+        if ( self.arrayOfLikes.containsObject(username) ){
+            //if user has liked the picture
+            //remove object for key... and update UI
+            let query = PFQuery(className: "ImageLike")
+            query.whereKey("User", equalTo: username)
+            query.whereKey("ImageId", equalTo: imageId)
+            query.orderByDescending("createdAt")
+            query.findObjectsInBackgroundWithBlock({
+                (objects : [PFObject]?, error: NSError?) -> Void in
+                if error == nil {
+                    for object in objects! {
+                        object.deleteInBackgroundWithBlock({ (success:Bool, error:NSError?) -> Void in
+                            if (success){
+                                self.getLikersArray(button, imageId: imageId, username: username)
+                            } else {
+                                print(error?.localizedDescription, error?.userInfo)
+                                button.enabled = true
+                            }
+                        })
+                    }
+                }
+            })
+        } else {
+            //if user has not yet liked a picture
+            //add object... update UI
+            let newObject                 = PFObject(className: "ImageLike")
+            newObject["ImageId"]          = imageId
+            newObject["User"]             = username
+            newObject.saveInBackgroundWithBlock({
+                (success:Bool, error:NSError?) -> Void in
+                if( success ) {
+                    self.getLikersArray(button, imageId: imageId, username: username)
+                } else {
+                    print(error?.localizedDescription, error?.userInfo)
+                    button.enabled = true
+                }
+            })
+        }
+    }
+    
     //MARK: Log out Current User
     func logoutUser(){
         // Clear all caches, then log out user
@@ -248,9 +400,9 @@ class DataAccessObject {
     @objc func updateNotificaitonSent(notification: NSNotification) {
         print("\(notification.name) notificaiton sent")
     }
+    
     deinit {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
-    
     
 }

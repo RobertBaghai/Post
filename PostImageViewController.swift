@@ -12,14 +12,14 @@ class PostImageViewController: UIViewController, UITextFieldDelegate {
     
     var imagePickerImage: UIImage?
     @IBOutlet weak var imageForPosting: UIImageView!
+    @IBOutlet weak var newImgDescription: UITextField!
     let dataAccess = DataAccessObject.sharedInstance
     var currentUser: AnyObject?
-    @IBOutlet weak var newImgDescription: UITextField!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.imageForPosting.image      = imagePickerImage
         self.newImgDescription.delegate = self
+        self.imageForPosting.image      = imagePickerImage
         dataAccess.getCurrentUser()
         self.currentUser = dataAccess.currentUser
     }

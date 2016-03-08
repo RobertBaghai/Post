@@ -32,10 +32,10 @@ class ProfileDetailViewController: UIViewController, UITextFieldDelegate,UIImage
         super.viewDidAppear(animated)
     }
     
-//    override func viewDidDisappear(animated: Bool) {
-//        super.viewDidDisappear(animated)
-////        dataAccess.getCurrentUserProfileInfo(dataAccess.currentUser!.objectId!)
-//    }
+    //    override func viewDidDisappear(animated: Bool) {
+    //        super.viewDidDisappear(animated)
+    ////        dataAccess.getCurrentUserProfileInfo(dataAccess.currentUser!.objectId!)
+    //    }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()

@@ -71,28 +71,6 @@ class ProfileViewController: UIViewController, UICollectionViewDelegate, UIColle
         self.performSegueWithIdentifier("showEditProfileScreen", sender: self)
     }
     
-    //MARK: CollectionView DataSource
-    func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
-        return 1
-    }
-    
-    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return dataAccess.arrayOfUserPosts.count
-    }
-    
-    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reuseIdentifier, forIndexPath: indexPath) as! PostCollectionViewCell
-        
-        let imagePosts: ImagePost = dataAccess.arrayOfUserPosts[indexPath.row]
-        
-        let imageUrl:NSURL? = NSURL(string: "\(imagePosts.postedImage!.url!)")
-        let placeholderImage: UIImage = UIImage(named: "placeholder.png")!
-        if let url = imageUrl {
-            cell.imageCell.sd_setImageWithURL(url, placeholderImage: placeholderImage)
-        }
-        
-        return cell
-    }
     
     @IBAction func picturePickerButton(sender: AnyObject) {
         let alertController = UIAlertController.init(title: "Choose a picture to Post!", message: "Would you like to select an existing photo or take a new one?", preferredStyle: .ActionSheet)
@@ -128,12 +106,43 @@ class ProfileViewController: UIViewController, UICollectionViewDelegate, UIColle
         self.performSegueWithIdentifier("showPostImageScreen", sender: image)
     }
     
+    
+    
+    //MARK: CollectionView DataSource
+    func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
+        return 1
+    }
+    
+    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return dataAccess.arrayOfUserPosts.count
+    }
+    
+    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reuseIdentifier, forIndexPath: indexPath) as! PostCollectionViewCell
+        
+        let imagePosts: ImagePost = dataAccess.arrayOfUserPosts[indexPath.row]
+        
+        let imageUrl:NSURL? = NSURL(string: "\(imagePosts.postedImage!.url!)")
+        let placeholderImage: UIImage = UIImage(named: "placeholder.png")!
+        if let url = imageUrl {
+            cell.imageCell.sd_setImageWithURL(url, placeholderImage: placeholderImage)
+        }
+        
+        return cell
+    }
+    
     //MARK: CollectionView Delegate
     
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         let imagePosts: ImagePost = dataAccess.arrayOfUserPosts[indexPath.row]
         print(imagePosts.imageId!)
         self.performSegueWithIdentifier("showPostDetailScreen", sender: imagePosts)
+    }
+    
+    
+    //MARK: Notification Center
+    deinit {
+        NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
     //     MARK: - Navigation
@@ -151,13 +160,9 @@ class ProfileViewController: UIViewController, UICollectionViewDelegate, UIColle
         } else if( segue.identifier == "showPostDetailScreen"){
             if let postDetailView: PostDetailViewController = segue.destinationViewController as? PostDetailViewController {
                 postDetailView.imagePost = sender as? ImagePost
+                postDetailView.userProfile = dataAccess.userProfile!
             }
         }
-    }
-    
-    //MARK: Notification Center
-    deinit {
-        NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
 }
