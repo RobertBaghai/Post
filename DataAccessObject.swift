@@ -21,21 +21,13 @@ class DataAccessObject {
     var profileDescription: String?
     var profilePicture:     UIImage?
     var retrievedAvatar:    PFFile?
-    var arrayOfUserPosts:   [ImagePost] = []
-    var arrayOfComments:    [ImagePostDetail] = []
-    var arrayOfLikes:NSMutableArray   = []
+    var arrayOfUserPosts:  [ImagePost] = []
+    var arrayOfComments:   [ImagePostDetail] = []
+    var arrayOfLikes:       NSMutableArray   = []
+    var usersArray:         NSMutableArray   = []
     
     private init() {
         PFUser.registerSubclass()
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "loginError",       object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "loginSuccess",     object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "signupError",      object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "signupSuccess",    object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "getProfileInfo",   object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "retrievedPost",    object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "retrieveUserData", object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "retrieveComments", object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateNotificaitonSent:", name: "retrieveLikes", object: nil)
     }
     
     //MARK: Login User with parse
@@ -80,7 +72,6 @@ class DataAccessObject {
         let defaultAvatar           = UIImage(named: "AvatarPlaceholderBig")
         let imageData: NSData       = UIImagePNGRepresentation(defaultAvatar!)!
         let newFile                 = PFFile(name: "image.png", data: imageData)
-        
         let newObject               = PFObject(className: "UserProfile")
         newObject["ProfileName"]    = "FirstName LastName"
         newObject["ProfileAboutMe"] = "User hasn't added a description yet"
@@ -90,7 +81,7 @@ class DataAccessObject {
         
         newObject.saveInBackgroundWithBlock {
             (success: Bool, error: NSError?) -> Void in
-            if (success) {
+            if ( success ) {
                 print("New User. Default Profile Info Saved")
             } else {
                 print("There was an error saving user info : \(error?.userInfo), \(error?.localizedDescription)")
@@ -134,7 +125,7 @@ class DataAccessObject {
         query.findObjectsInBackgroundWithBlock {
             (objects:[PFObject]?, error:NSError?) -> Void in
             for updatedObject:PFObject in objects! {
-                if (error != nil){
+                if ( error != nil ){
                     print(error?.userInfo)
                 } else {
                     let profileName:  String       = updatedObject["ProfileName"]    as! String
@@ -179,7 +170,7 @@ class DataAccessObject {
         }
     }
     
-    //not using this method yet
+    //not using this method yet ^^^^
     func retrieveNewPostedImage(imageId: String){
         let query = PFQuery(className: "ImagePost")
         query.orderByDescending("createdAt")
@@ -253,7 +244,7 @@ class DataAccessObject {
                 print(error?.localizedDescription, error?.userInfo)
             } else {
                 print("Comment Saved")
-                //TODO: retrieve new comment and reload the table view
+                //TODO: retrieve only the new comment and reload the table view
                 self.retrieveCommentsForImageId(id: imageId)
             }
         }
@@ -320,6 +311,7 @@ class DataAccessObject {
         }
     }
     
+    //MARK: Likes
     func getLikersArray(button:UIButton, imageId:String, username: String){
         self.arrayOfLikes.removeAllObjects()
         let query = PFQuery(className: "ImageLike")
@@ -383,6 +375,26 @@ class DataAccessObject {
             })
         }
     }
+    
+    
+    //MARK: User Relations
+    
+    func testGetAllUsers (tableview: UITableView){
+        self.usersArray.removeAllObjects()
+        let query = PFUser.query()
+        query?.orderByAscending("username")
+        query?.findObjectsInBackgroundWithBlock({
+            (objects: [PFObject]?, error: NSError?) -> Void in
+            
+            for(var i = 0; i < objects!.count; i++){
+                let user: PFUser = objects![i] as! PFUser
+                self.usersArray .addObject(user.username!)
+            }
+            tableview.reloadData()
+        })
+    }
+    
+    
     
     //MARK: Log out Current User
     func logoutUser(){

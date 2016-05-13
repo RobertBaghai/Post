@@ -39,7 +39,7 @@ class PostImageViewController: UIViewController, UITextFieldDelegate {
     @IBAction func postImageButton(sender: AnyObject) {
         dataAccess.postNewImageForUserId(
             dataAccess.currentUser!.username!,
-            userId: currentUser!.objectId!!,
+            userId: dataAccess.currentUser!.objectId!,
             image: self.imageForPosting!.image!,
             imgDescription: self.newImgDescription!.text!
         )

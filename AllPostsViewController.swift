@@ -15,10 +15,6 @@ class AllPostsViewController: UIViewController {
         
     }
     
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-    }
-    
     
     /*
     // MARK: - Navigation

@@ -12,13 +12,15 @@ class FriendsViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
     }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
     
+    @IBAction func editFriends(sender: AnyObject) {
+        performSegueWithIdentifier("showEditFriendsScreen", sender: nil)
+    }
     
     /*
     // MARK: - Navigation

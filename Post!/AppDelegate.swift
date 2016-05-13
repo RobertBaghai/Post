@@ -1,24 +1,24 @@
  //
-//  AppDelegate.swift
-//  Post!
-//
-//  Created by Robert Baghai on 2/12/16.
-//  Copyright © 2016 Robert Baghai. All rights reserved.
-//
-
-import UIKit
-import Parse
-
-@UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+ //  AppDelegate.swift
+ //  Post!
+ //
+ //  Created by Robert Baghai on 2/12/16.
+ //  Copyright © 2016 Robert Baghai. All rights reserved.
+ //
+ 
+ import UIKit
+ import Parse
+ 
+ @UIApplicationMain
+ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     var window: UIWindow?
     
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         
-        
         Parse.setApplicationId("MY_APP_ID",
-            clientKey: "MY_Client_Id")
+                               clientKey: "MY_Client_Id")
+        
         
         self.window?.tintColor = UIColor.orangeColor()
         
@@ -47,6 +47,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
     
-    
-}
-
+ }
+ 

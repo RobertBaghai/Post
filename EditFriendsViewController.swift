@@ -1,39 +1,58 @@
 //
-//  CameraTableViewController.swift
+//  EditFriendsViewController.swift
 //  Post!
 //
-//  Created by Robert Baghai on 2/12/16.
+//  Created by Robert Baghai on 3/10/16.
 //  Copyright © 2016 Robert Baghai. All rights reserved.
 //
 
 import UIKit
 
-class CameraTableViewController: UITableViewController {
+class EditFriendsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+    
+    @IBOutlet weak var tableView: UITableView!
+    let dataAccess = DataAccessObject.sharedInstance
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        dataAccess.testGetAllUsers(self.tableView)
+        self.tableView.delegate   = self
+        self.tableView.dataSource = self
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
     }
     
     // MARK: - Table view data source
-    
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return 0
+    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+        return 1
     }
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 0
+    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return dataAccess.usersArray.count
     }
     
-    /*
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCellWithIdentifier("reuseIdentifier", forIndexPath: indexPath)
     
-    // Configure the cell...
-    
-    return cell
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath)
+        
+        cell.textLabel?.text = "\(dataAccess.usersArray[indexPath.row])"
+        
+        return cell
     }
-    */
+    
+    func tableView(tableView: UITableView, didDeselectRowAtIndexPath indexPath: NSIndexPath) {
+        self.tableView.deselectRowAtIndexPath(indexPath, animated: false)
+        
+        let cell = tableView .cellForRowAtIndexPath(indexPath)
+        if cell?.accessoryType == UITableViewCellAccessoryType.Checkmark {
+            cell?.accessoryType = UITableViewCellAccessoryType.None
+        } else if cell?.accessoryType == UITableViewCellAccessoryType.None {
+            cell?.accessoryType = UITableViewCellAccessoryType.Checkmark
+        }
+        
+    }
     
     /*
     // Override to support conditional editing of the table view.

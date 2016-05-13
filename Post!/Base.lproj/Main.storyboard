@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9532" systemVersion="15D21" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="vKf-jd-iFI">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="vKf-jd-iFI">
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9530"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
     </dependencies>
     <scenes>
         <!--Log In View Controller-->
@@ -162,10 +162,10 @@
             </objects>
             <point key="canvasLocation" x="-2632" y="327"/>
         </scene>
-        <!--Following-->
+        <!--Friends-->
         <scene sceneID="RzH-rK-wHO">
             <objects>
-                <viewController id="5Gw-4A-LcY" sceneMemberID="viewController">
+                <viewController id="5Gw-4A-LcY" customClass="FriendsViewController" customModule="Post_" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="WGN-0d-XJ2"/>
                         <viewControllerLayoutGuide type="bottom" id="2ZV-bl-r8a"/>
@@ -175,11 +175,76 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     </view>
-                    <navigationItem key="navigationItem" title="Following" id="1ea-Di-DcO"/>
+                    <navigationItem key="navigationItem" title="Friends" id="1ea-Di-DcO">
+                        <barButtonItem key="rightBarButtonItem" title="Edit Friends" id="d3A-uj-n3v">
+                            <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="1L4-Rh-ioY">
+                                <rect key="frame" x="302" y="7" width="92" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="15"/>
+                                <state key="normal" title="Edit Friends"/>
+                                <connections>
+                                    <action selector="editFriends:" destination="5Gw-4A-LcY" eventType="touchUpInside" id="6WP-59-qYB"/>
+                                </connections>
+                            </button>
+                        </barButtonItem>
+                    </navigationItem>
+                    <connections>
+                        <segue destination="Wf0-fQ-RzM" kind="show" identifier="showEditFriendsScreen" id="dmW-sE-cwv"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="xdb-W8-YIb" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1429" y="327"/>
+            <point key="canvasLocation" x="-1436" y="327"/>
+        </scene>
+        <!--Edit Friends View Controller-->
+        <scene sceneID="ypc-gZ-KIv">
+            <objects>
+                <viewController id="Wf0-fQ-RzM" customClass="EditFriendsViewController" customModule="Post_" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="8Sp-yP-44n"/>
+                        <viewControllerLayoutGuide type="bottom" id="IQo-IU-t2R"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="e6v-ul-dHh">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="70" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="h4f-za-PrK">
+                                <rect key="frame" x="0.0" y="108" width="414" height="579"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="Cell" textLabel="RLT-lO-Dqd" style="IBUITableViewCellStyleDefault" id="aV9-xW-PBD">
+                                        <rect key="frame" x="0.0" y="92" width="414" height="70"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="aV9-xW-PBD" id="Qrc-VY-3QZ">
+                                            <rect key="frame" x="0.0" y="0.0" width="414" height="69.5"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="RLT-lO-Dqd">
+                                                    <rect key="frame" x="15" y="0.0" width="384" height="69.5"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                                    <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </prototypes>
+                            </tableView>
+                            <searchBar contentMode="redraw" fixedFrame="YES" placeholder="Find your friends..." translatesAutoresizingMaskIntoConstraints="NO" id="kAO-QO-BSA">
+                                <rect key="frame" x="0.0" y="64" width="414" height="44"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </searchBar>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                    <connections>
+                        <outlet property="tableView" destination="h4f-za-PrK" id="e1w-mK-suX"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="WCi-tl-b6Y" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-934" y="327"/>
         </scene>
         <!--Inbox-->
         <scene sceneID="zDq-qh-Us4">
@@ -250,7 +315,7 @@
             </objects>
             <point key="canvasLocation" x="-1929" y="327"/>
         </scene>
-        <!--Recipients-->
+        <!--Camera-->
         <scene sceneID="jtt-ug-MAC">
             <objects>
                 <tableViewController id="eMM-EQ-cD2" customClass="CameraTableViewController" customModule="Post_" customModuleProvider="target" sceneMemberID="viewController">
@@ -273,7 +338,7 @@
                             <outlet property="delegate" destination="eMM-EQ-cD2" id="7TW-GY-fED"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Recipients" id="D0O-Tm-qyj"/>
+                    <navigationItem key="navigationItem" title="Camera" id="D0O-Tm-qyj"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="eXm-Fn-dfG" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -311,7 +376,15 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     </view>
-                    <navigationItem key="navigationItem" title="Friends' Posts" id="lA8-wJ-0q5"/>
+                    <navigationItem key="navigationItem" title="Friends' Posts" id="lA8-wJ-0q5">
+                        <barButtonItem key="rightBarButtonItem" style="done" id="6fi-Zz-qox">
+                            <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="4Sc-Jz-uhf">
+                                <rect key="frame" x="302" y="7" width="92" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Button"/>
+                            </button>
+                        </barButtonItem>
+                    </navigationItem>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="pFE-bk-Iwt" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

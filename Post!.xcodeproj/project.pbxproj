@@ -45,6 +45,7 @@
 		4386A3EF1C6E2F9F00DE466F /* PostCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4386A3EE1C6E2F9F00DE466F /* PostCollectionViewCell.swift */; };
 		4386A3F11C6E2FD400DE466F /* PostDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4386A3F01C6E2FD400DE466F /* PostDetailViewController.swift */; };
 		4386A3F31C6E2FDE00DE466F /* ProfileDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4386A3F21C6E2FDE00DE466F /* ProfileDetailViewController.swift */; };
+		43DA6F6A1C921F6F00B97626 /* EditFriendsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DA6F691C921F6F00B97626 /* EditFriendsViewController.swift */; };
 		43DBC1541C73D14D00F6AC16 /* CommentsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DBC1531C73D14D00F6AC16 /* CommentsViewController.swift */; };
 /* End PBXBuildFile section */
 
@@ -109,6 +110,7 @@
 		4386A3EE1C6E2F9F00DE466F /* PostCollectionViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostCollectionViewCell.swift; sourceTree = "<group>"; };
 		4386A3F01C6E2FD400DE466F /* PostDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostDetailViewController.swift; sourceTree = "<group>"; };
 		4386A3F21C6E2FDE00DE466F /* ProfileDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileDetailViewController.swift; sourceTree = "<group>"; };
+		43DA6F691C921F6F00B97626 /* EditFriendsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = EditFriendsViewController.swift; path = ../EditFriendsViewController.swift; sourceTree = "<group>"; };
 		43DBC1531C73D14D00F6AC16 /* CommentsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommentsViewController.swift; sourceTree = "<group>"; };
 		D583971D44B6F2015BC34EA8 /* Pods-Post!.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Post!.release.xcconfig"; path = "Pods/Target Support Files/Pods-Post!/Pods-Post!.release.xcconfig"; sourceTree = "<group>"; };
 		D7904CAAA6A4E6D3DBCC2AAE /* Pods-Post!.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Post!.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Post!/Pods-Post!.debug.xcconfig"; sourceTree = "<group>"; };
@@ -249,6 +251,7 @@
 				4386A3DA1C6E2E0B00DE466F /* Cells */,
 				4386A3D91C6E2E0900DE466F /* Detail */,
 				43DBC1521C73D00800F6AC16 /* Comments */,
+				43DA6F661C921F2E00B97626 /* EditFriends */,
 				4386A3D81C6E2E0300DE466F /* Delegate */,
 			);
 			name = Controllers;
@@ -339,6 +342,15 @@
 				4386A3E01C6E2EDB00DE466F /* SignUpViewController.swift */,
 			);
 			name = LoginSignUp;
+			sourceTree = "<group>";
+		};
+		43DA6F661C921F2E00B97626 /* EditFriends */ = {
+			isa = PBXGroup;
+			children = (
+				43DA6F691C921F6F00B97626 /* EditFriendsViewController.swift */,
+			);
+			name = EditFriends;
+			path = "Post!";
 			sourceTree = "<group>";
 		};
 		43DBC1521C73D00800F6AC16 /* Comments */ = {
@@ -532,6 +544,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				43DA6F6A1C921F6F00B97626 /* EditFriendsViewController.swift in Sources */,
 				4386A3E51C6E2F0900DE466F /* FriendsViewController.swift in Sources */,
 				4386A3F11C6E2FD400DE466F /* PostDetailViewController.swift in Sources */,
 				4386A3E31C6E2F0000DE466F /* InboxViewController.swift in Sources */,
